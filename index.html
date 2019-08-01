@@ -1,7 +1,6 @@
 <html>
   <head>
-    <style>
-
+<style>
 body {
   font-family: verdana;
   display: flex;
@@ -18,47 +17,58 @@ td {
   margin: 0;
   border: solid 1px black;
 }
-    </style>
+</style>
   </head>
   <body>
     <h1>Acme Table Builder</h1>
-      <div id='usersTable'>
-        <table>
-          <thead id='tableHead'>
-            <tr>
-              <th>Name</th>
-              <th>Position</th>
-              <th>Salary</th>
-            </tr>
-          </thead>
-          <thead>
-          </thead>
-          <tbody>
-            <tr>
-              <td>Larry</td>
-              <td>CTO</td>
-              <td>70000</td>
-            </tr>
-            <tr>
-              <td>Curly</td>
-              <td>CPO</td>
-              <td>75000</td>
-            </tr>
-            <tr>
-              <td>Moe</td>
-              <td>CEO</td>
-              <td>80000</td>
-            </tr>
-            <tr>
-              <td>Shep</td>
-              <td>Security Officer</td>
-              <td>100000</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    <script>
-        const usersTable = new TableBuilder(
+    <div id='usersTable'></div>
+  <script>
+    class TableBuilder{
+      constructor(headers, data, selector){
+        this.headers = headers;
+        this.data = data;
+        this.selector = selector;
+      }
+      init(){
+        this.render();
+        document.querySelector(this.selector).addEventListener('click', (ev)=> {
+          if(ev.target.tagName === 'TH'){
+            const idx = [...ev.target.parentNode.children].indexOf(ev.target);
+            const header = this.headers[idx];
+            const key = header.key;
+            this.data = this.data.sort((a, b)=> {
+              if(header.type === 'number'){
+                return a[key] - b[key];
+              }
+              return a[key].localeCompare(b[key])
+            });
+            this.render();
+          }
+        });
+
+      }
+      render(){
+        const generateRow = (item)=> this.headers.map( header => `<td>${item[header.key]}</td>`).join('');
+        const html = `
+          <table>
+            <thead>
+            ${
+              this.headers.map( header => `<th>${header.title}</th>`).join('')
+            }
+            <thead>
+            <tbody>
+            ${
+              this.data.map( item => `<tr>${ generateRow(item)}</tr>`).join('')
+            }
+            </tbody>
+          </table>
+        `;
+        console.log(html);
+         document.querySelector(this.selector).innerHTML = html;
+      }
+    }
+
+    const usersTable = new TableBuilder(
       [
         {
           title: 'Name',
@@ -97,9 +107,10 @@ td {
           salary: 1000000
         }
       ],
-      '#usersTable'//id of DOM element
+      '#usersTable'
     );
     usersTable.init();
-    </script>
+  </script>
   </body>
 </html>
+
